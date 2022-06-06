@@ -57,6 +57,11 @@ def except_not_empty_col(first, last, loc):
         # print("word 1 : {}".format(pick_1))
 
 def col_and_row(nextWord, nextWord_loc):
+    secondWord = ''
+    secondWord_loc = ()
+    thirdWord = ''
+    thirdWord_loc = ()
+
     # 세로로 넣기
     # 다음단어중 random으로 문자 뽑아오기
     getrandom = random.randrange(0, len(nextWord))
@@ -75,7 +80,25 @@ def col_and_row(nextWord, nextWord_loc):
                     for letter in word:
                         BOARD[pick_1_loc[0] - loc][pick_1_loc[1]] = letter
                         loc -= 1
-    #세로로 넣을수 있는 단어가 없으면 무작위 빈칸에 넣기
+                    wordSet.remove(word)
+        break
+    #세로로 넣을수 있는 단어가 없으면 무작위 빈칸에 세로로 넣기
+    if secondWord == '':
+        secondWord = wordSet.pop()
+        while True:
+            n1 = random.randrange(0, MAXSIZE - len(secondWord))
+            n2 = random.randrange(0, MAXSIZE)
+            if except_not_empty_row() || except_row():
+                break
+
+            i = 0
+
+            for letter in secondWord:
+                BOARD[n1][n2 + i] = letter
+                i += 1
+            secondWord_loc = (n1, n2)
+
+    print_board()
 
     #가로로 넣기
     # 두번째 단어에 가로로 뽑을 위치 찾기
@@ -95,6 +118,7 @@ def col_and_row(nextWord, nextWord_loc):
                     for letter in word:
                         BOARD[pick_2_loc[0]][pick_2_loc[1] - loc] = letter
                         loc -= 1
+                    wordSet.remove(word)
     #가로로 넣을수 있는 단어가 없으면 무작위 빈칸에 넣기
 
     #단어가 없으면 끝냄
@@ -102,8 +126,7 @@ def col_and_row(nextWord, nextWord_loc):
         return
     else:
         col_and_row(thirdWord, thirdWord_loc)
-
-
+    print_board()
 
 
 def put_word():
@@ -115,71 +138,7 @@ def put_word():
     for letter in firstWord:
         BOARD[n1][n2+i] = letter
         i += 1
-
-    #첫 단어중 random으로 문자 뽑아오기
-    getrandom = random.randrange(0, len(firstWord))
-    pick_1 = firstWord[getrandom]
-    pick_1_loc = (n1, n2+getrandom)
-
-    #뽑은 단어와 첫 위치
-    secondWord = ''
-    secondWord_loc = ()
-
-    thirdWord = ''
-    thirdWord_loc = ()
-
-    #나머지 단어중 세로로 넣을 단어 찾아보기
-    while True:
-        #print("word 1 : {}".format(pick_1))
-        for word in wordSet:
-            loc = word.find(pick_1)
-            #단어를 찾았으면 세로로 넣기(예외처리 후)
-            if loc != -1:
-                if except_row(loc, len(word), pick_1_loc):
-                    if except_not_empty_row(loc, len(word), pick_1_loc):
-                        secondWord = word
-                        secondWord_loc = (pick_1_loc[0]-loc, pick_1_loc[1])
-                        for letter in word:
-                            BOARD[pick_1_loc[0] - loc][pick_1_loc[1]] = letter
-                            loc -= 1
-
-        #두번째 단어에 가로로 뽑을 위치 찾기
-        getrandom = random.randrange(0, len(secondWord))
-        pick_2 = secondWord[getrandom]
-        pick_2_loc = (secondWord_loc[0]+getrandom, secondWord_loc[1])
-
-        #나머지 단어중 가로로 넣을 단어 찾기
-        for word in wordSet:
-            loc = word.find(pick_2)
-            #단어를 찾으면 예외처리 후 가로로 넣기
-            if loc != -1:
-                if except_col(loc, len(word), pick_2_loc):
-                    if except_not_empty_col(loc, len(word), pick_2_loc):
-                        thirdWord = word
-                        thirdWord_loc = (pick_2_loc[0], pick_2_loc[1]-loc)
-                        for letter in word:
-                            BOARD[pick_2_loc[0]][pick_2_loc[1]-loc] = letter
-                            loc -= 1
-        #다시 세로로 넣기
-
-        #넣을수 있는 단어가 없으므로 가로로 무작위 빈칸에 넣는다
-        nextWord = wordSet.pop()
-        n1 = random.randrange(0, MAXSIZE)
-        n2 = random.randrange(0, MAXSIZE - len(nextWord))
-        for i in range (len(nextWord)):
-            if BOARD[n1][n2+i] != ' ':
-                break
-            else :
-                i = 0
-                for letter in nextWord:
-                    BOARD[n1][n2 + i] = letter
-                    i += 1
-                break
-
-        if not wordSet:
-            break
-        else:
-            continue
+    col_and_row(firstWord,(n1,n2))
 
 def print_board():
     for i in range(MAXSIZE):
@@ -190,9 +149,6 @@ if __name__ == '__main__':
     get_word_set()
     put_word()
     print_board()
-
-
-
 
 '''
 1. Sort all the words by length, descending.
